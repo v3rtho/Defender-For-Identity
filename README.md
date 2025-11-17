@@ -52,7 +52,7 @@ This PowerShell script provides a comprehensive WPF-based GUI wrapper around the
 ## 🚀 Prerequisites
 
 - **Operating System:** Windows 10/11 or Windows Server 2016+
-- **PowerShell:** Version 5.1 or later (included in Windows 10/11)
+- **PowerShell:** Version 5.1 or later 
 - **Module:** DefenderForIdentity PowerShell module
 - **Permissions:** Administrator rights required for most operations
 
