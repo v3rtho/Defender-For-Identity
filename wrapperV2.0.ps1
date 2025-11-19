@@ -262,18 +262,18 @@ Add-Type -AssemblyName PresentationFramework
                 </ScrollViewer>
             </TabItem>
 
-            <!-- DSA Tab -->
-            <TabItem Header="DSA">
+            <!-- gMSA Tab -->
+            <TabItem Header="gMSA">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="15">
-                        <TextBlock Text="Directory Service Account (DSA)" 
+                        <TextBlock Text="Group Managed Service Account (gMSA)" 
                                    FontSize="16" 
                                    FontWeight="Bold"
                                    Margin="0,0,0,10"/>
 
                         <TextBlock TextWrapping="Wrap" 
                                    Margin="0,0,0,15">
-                            <Run Text="The DSA is a Group Managed Service Account (gMSA) used by MDI to query domain controllers for suspicious activities."/>
+                            <Run Text="The gMSA is a Group Managed Service Account used by MDI to query domain controllers for suspicious activities."/>
                         </TextBlock>
 
                         <Label Content="gMSA Identity (username):"/>
@@ -288,26 +288,16 @@ Add-Type -AssemblyName PresentationFramework
 
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
                             <Button x:Name="btnCreateDSA" 
-                                    Content="Create gMSA DSA" 
+                                    Content="Create gMSA" 
                                     Width="140" 
                                     Height="35"
                                     Margin="0,0,10,0"/>
                             
                             <Button x:Name="btnTestDSA" 
-                                    Content="Test DSA" 
+                                    Content="Test gMSA" 
                                     Width="120" 
                                     Height="35"/>
                         </StackPanel>
-
-                        <TextBlock Text="Get Current Configuration:" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,10"/>
-                        
-                        <Button x:Name="btnGetConfig" 
-                                Content="Get MDI Configuration" 
-                                Width="180" 
-                                Height="35"
-                                HorizontalAlignment="Left"/>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -618,7 +608,7 @@ $Controls.btnCreateDSA.Add_Click({
     
     $command = "New-MDIDSA -Identity '$gmsaIdentity' -GmsaGroupName '$gmsaGroupName'"
     
-    $Controls.txtOutput.Text = "Creating gMSA DSA account...`n`n"
+    $Controls.txtOutput.Text = "Creating gMSA account...`n`n"
     $Controls.txtOutput.Text += "Executing: $command`n`n"
     
     try {
@@ -633,11 +623,30 @@ $Controls.btnCreateDSA.Add_Click({
 
 # Test DSA button
 $Controls.btnTestDSA.Add_Click({
-    $command = "Test-MDIDSA"
+    $gmsaIdentity = $Controls.txtGmsaIdentity.Text.Trim()
     
-    $Controls.txtOutput.Text = "Executing: $command`n`n"
+    if ([string]::IsNullOrWhiteSpace($gmsaIdentity)) {
+        [System.Windows.MessageBox]::Show(
+            "Please enter the gMSA Identity before testing.",
+            "Missing gMSA Identity",
+            [System.Windows.MessageBoxButton]::OK,
+            [System.Windows.MessageBoxImage]::Warning)
+        return
+    }
+    
+    $command = "Test-MDIDSA -Identity '$gmsaIdentity'"
+    
+    $Controls.txtOutput.Text = "Testing gMSA account...`n`n"
+    $Controls.txtOutput.Text += "Executing: $command`n`n"
     $Controls.txtOutput.Text += "Testing Directory Service Account permissions and delegations...`n`n"
-    $Controls.txtOutput.Text += Invoke-MDICommand $command
+    
+    try {
+        $result = Test-MDIDSA -Identity $gmsaIdentity
+        $Controls.txtOutput.Text += $result | Format-List * | Out-String
+    }
+    catch {
+        $Controls.txtOutput.Text += "Error: $($_.Exception.Message)"
+    }
 })
 
 # Get Configuration button
