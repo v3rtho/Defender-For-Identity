@@ -2,12 +2,13 @@
 # Requires: PowerShell 5.1 or later
 
 Add-Type -AssemblyName PresentationFramework
+Add-Type -AssemblyName Microsoft.VisualBasic
 
 # XAML Definition
 [xml]$XAML = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Microsoft Defender for Identity - PowerShell GUI" 
+        Title="Defender for Identity Configurator" 
         Height="700" Width="900"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="10">
@@ -110,12 +111,6 @@ Add-Type -AssemblyName PresentationFramework
                                          ToolTip="Custom prefix for GPO names (e.g., 'MDI-' will create 'MDI-AuditPolicy')"/>
                             </StackPanel>
                         </GroupBox>
-
-                        <Button x:Name="btnSetConfig" 
-                                Content="Apply Configuration" 
-                                Width="150" 
-                                Height="35"
-                                HorizontalAlignment="Left"/>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -145,27 +140,49 @@ Add-Type -AssemblyName PresentationFramework
                         <!-- Test Configuration -->
                         <GroupBox Header="Configuration to Test" Margin="0,0,0,15">
                             <StackPanel>
-                                <RadioButton x:Name="rbTestAll" 
-                                           Content="All Configurations" 
-                                           IsChecked="True" 
-                                           Margin="5"/>
-                                <RadioButton x:Name="rbTestAdvancedAudit" 
-                                           Content="Advanced Audit Policy" 
-                                           Margin="5"/>
-                                <RadioButton x:Name="rbTestNtlm" 
-                                           Content="NTLM Auditing" 
-                                           Margin="5"/>
-                                <RadioButton x:Name="rbTestDomainObject" 
-                                           Content="Domain Object Auditing" 
-                                           Margin="5"/>
+                                <CheckBox x:Name="chkTestAll" 
+                                        Content="All Configurations" 
+                                        FontWeight="Bold"
+                                        Margin="5,5,5,10"/>
+                                
+                                <Separator Margin="5"/>
+                                
+                                <CheckBox x:Name="chkTestAdfsAuditing" 
+                                        Content="ADFS Auditing" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestAdRecycleBin" 
+                                        Content="AD Recycle Bin" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestAdvancedAuditPolicyCAs" 
+                                        Content="Advanced Audit Policy (CAs)" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestAdvancedAuditPolicyDCs" 
+                                        Content="Advanced Audit Policy (DCs)" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestCAAuditing" 
+                                        Content="Certificate Authority (CA) Auditing" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestConfigurationContainerAuditing" 
+                                        Content="Configuration Container Auditing" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestEntraConnectAuditing" 
+                                        Content="Entra Connect Auditing" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestRemoteSAM" 
+                                        Content="Remote SAM" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestDomainObjectAuditing" 
+                                        Content="Domain Object Auditing" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestNTLMAuditing" 
+                                        Content="NTLM Auditing" 
+                                        Margin="5"/>
+                                <CheckBox x:Name="chkTestProcessorPerformance" 
+                                        Content="Processor Performance" 
+                                        Margin="5"/>
                             </StackPanel>
                         </GroupBox>
 
-                        <Button x:Name="btnTestConfig" 
-                                Content="Run Test" 
-                                Width="150" 
-                                Height="35"
-                                HorizontalAlignment="Left"/>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -309,6 +326,16 @@ Add-Type -AssemblyName PresentationFramework
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right"
                     Margin="0,10">
+            <Button x:Name="btnSetConfig" 
+                    Content="Apply Configuration" 
+                    Width="150" 
+                    Height="30"
+                    Margin="0,0,10,0"/>
+            <Button x:Name="btnTestConfig" 
+                    Content="Run Test" 
+                    Width="120" 
+                    Height="30"
+                    Margin="0,0,10,0"/>
             <Button x:Name="btnClearOutput" 
                     Content="Clear Output" 
                     Width="120" 
@@ -354,17 +381,28 @@ function Invoke-MDICommand {
     $output = New-Object System.Text.StringBuilder
     
     try {
-        $result = Invoke-Expression $Command 2>&1
+        # Add -Verbose to the command if not already present
+        if ($Command -notlike "*-Verbose*") {
+            $Command += " -Verbose"
+        }
+        
+        $result = Invoke-Expression $Command *>&1
         
         if ($result) {
             foreach ($item in $result) {
                 if ($item -is [System.Management.Automation.ErrorRecord]) {
                     [void]$output.AppendLine("Error: $($item.Exception.Message)")
-                } else {
-                    [void]$output.AppendLine($item.ToString())
+                } elseif ($item -is [System.Management.Automation.VerboseRecord]) {
+                    [void]$output.AppendLine("VERBOSE: $($item.Message)")
+                } elseif ($item -is [System.Management.Automation.WarningRecord]) {
+                    [void]$output.AppendLine("WARNING: $($item.Message)")
+                } elseif ($item -is [System.Management.Automation.InformationRecord]) {
+                    [void]$output.AppendLine("INFO: $($item.MessageData)")
                 }
+                # Removed the else block that was showing "Result: ..." for non-verbose output
             }
         }
+        # Removed the "Result: False" output for empty results
     }
     catch {
         [void]$output.AppendLine("Exception: $($_.Exception.Message)")
@@ -433,6 +471,35 @@ $Controls.chkAll.Add_Unchecked({
     $Controls.chkProcessorPerformance.IsChecked = $false
 })
 
+# Test Check All checkbox handler
+$Controls.chkTestAll.Add_Checked({
+    $Controls.chkTestAdfsAuditing.IsChecked = $true
+    $Controls.chkTestAdRecycleBin.IsChecked = $true
+    $Controls.chkTestAdvancedAuditPolicyCAs.IsChecked = $true
+    $Controls.chkTestAdvancedAuditPolicyDCs.IsChecked = $true
+    $Controls.chkTestCAAuditing.IsChecked = $true
+    $Controls.chkTestConfigurationContainerAuditing.IsChecked = $true
+    $Controls.chkTestEntraConnectAuditing.IsChecked = $true
+    $Controls.chkTestRemoteSAM.IsChecked = $true
+    $Controls.chkTestDomainObjectAuditing.IsChecked = $true
+    $Controls.chkTestNTLMAuditing.IsChecked = $true
+    $Controls.chkTestProcessorPerformance.IsChecked = $true
+})
+
+$Controls.chkTestAll.Add_Unchecked({
+    $Controls.chkTestAdfsAuditing.IsChecked = $false
+    $Controls.chkTestAdRecycleBin.IsChecked = $false
+    $Controls.chkTestAdvancedAuditPolicyCAs.IsChecked = $false
+    $Controls.chkTestAdvancedAuditPolicyDCs.IsChecked = $false
+    $Controls.chkTestCAAuditing.IsChecked = $false
+    $Controls.chkTestConfigurationContainerAuditing.IsChecked = $false
+    $Controls.chkTestEntraConnectAuditing.IsChecked = $false
+    $Controls.chkTestRemoteSAM.IsChecked = $false
+    $Controls.chkTestDomainObjectAuditing.IsChecked = $false
+    $Controls.chkTestNTLMAuditing.IsChecked = $false
+    $Controls.chkTestProcessorPerformance.IsChecked = $false
+})
+
 # Set Configuration button
 $Controls.btnSetConfig.Add_Click({
     $mode = if ($Controls.rbDomain.IsChecked) { "Domain" } else { "LocalMachine" }
@@ -463,6 +530,25 @@ $Controls.btnSetConfig.Add_Click({
         return
     }
     
+    # Check if EntraConnectAuditing or RemoteSAM is selected (or All) and prompt for service account
+    $serviceAccount = $null
+    if ($Controls.chkAll.IsChecked -or $Controls.chkEntraConnectAuditing.IsChecked -or $Controls.chkRemoteSAM.IsChecked) {
+        $serviceAccount = [Microsoft.VisualBasic.Interaction]::InputBox(
+            "Enter the Service Account name for EntraConnectAuditing or RemoteSAM:",
+            "Service Account Required",
+            ""
+        )
+        
+        if ([string]::IsNullOrWhiteSpace($serviceAccount)) {
+            [System.Windows.MessageBox]::Show(
+                "Service Account name is required for EntraConnectAuditing or RemoteSAM configuration.",
+                "Missing Service Account",
+                [System.Windows.MessageBoxButton]::OK,
+                [System.Windows.MessageBoxImage]::Warning)
+            return
+        }
+    }
+    
     $configString = $configs -join ","
     
     # Build the command with optional parameters
@@ -479,6 +565,11 @@ $Controls.btnSetConfig.Add_Click({
         $command += " -GpoNamePrefix '$gpoPrefix'"
     }
     
+    # Add Identity parameter if provided
+    if ($serviceAccount) {
+        $command += " -Identity '$serviceAccount'"
+    }
+    
     $Controls.txtOutput.Text = "Executing: $command`n`n"
     $Controls.txtOutput.Text += "This may take a few moments...`n`n"
     $Controls.txtOutput.Text += Invoke-MDICommand $command
@@ -487,13 +578,59 @@ $Controls.btnSetConfig.Add_Click({
 # Test Configuration button
 $Controls.btnTestConfig.Add_Click({
     $mode = if ($Controls.rbTestDomain.IsChecked) { "Domain" } else { "LocalMachine" }
-    $config = "All"
+    $configs = @()
     
-    if ($Controls.rbTestAdvancedAudit.IsChecked) { $config = "AdvancedAuditPolicy" }
-    elseif ($Controls.rbTestNtlm.IsChecked) { $config = "NtlmAuditing" }
-    elseif ($Controls.rbTestDomainObject.IsChecked) { $config = "DomainObjectAuditing" }
+    if ($Controls.chkTestAll.IsChecked) {
+        $configs = @("All")
+    } else {
+        if ($Controls.chkTestAdfsAuditing.IsChecked) { $configs += "AdfsAuditing" }
+        if ($Controls.chkTestAdRecycleBin.IsChecked) { $configs += "AdRecycleBin" }
+        if ($Controls.chkTestAdvancedAuditPolicyCAs.IsChecked) { $configs += "AdvancedAuditPolicyCAs" }
+        if ($Controls.chkTestAdvancedAuditPolicyDCs.IsChecked) { $configs += "AdvancedAuditPolicyDCs" }
+        if ($Controls.chkTestCAAuditing.IsChecked) { $configs += "CAAuditing" }
+        if ($Controls.chkTestConfigurationContainerAuditing.IsChecked) { $configs += "ConfigurationContainerAuditing" }
+        if ($Controls.chkTestEntraConnectAuditing.IsChecked) { $configs += "EntraConnectAuditing" }
+        if ($Controls.chkTestRemoteSAM.IsChecked) { $configs += "RemoteSAM" }
+        if ($Controls.chkTestDomainObjectAuditing.IsChecked) { $configs += "DomainObjectAuditing" }
+        if ($Controls.chkTestNTLMAuditing.IsChecked) { $configs += "NTLMAuditing" }
+        if ($Controls.chkTestProcessorPerformance.IsChecked) { $configs += "ProcessorPerformance" }
+    }
     
-    $command = "Test-MDIConfiguration -Mode $mode -Configuration $config"
+    if ($configs.Count -eq 0) {
+        [System.Windows.MessageBox]::Show(
+            "Please select at least one configuration option to test.",
+            "No Selection",
+            [System.Windows.MessageBoxButton]::OK,
+            [System.Windows.MessageBoxImage]::Warning)
+        return
+    }
+    
+    # Check if EntraConnectAuditing or RemoteSAM is selected (or All) and prompt for service account
+    $serviceAccount = $null
+    if ($Controls.chkTestAll.IsChecked -or $Controls.chkTestEntraConnectAuditing.IsChecked -or $Controls.chkTestRemoteSAM.IsChecked) {
+        $serviceAccount = [Microsoft.VisualBasic.Interaction]::InputBox(
+            "Enter the Service Account name for EntraConnectAuditing or RemoteSAM:",
+            "Service Account Required",
+            ""
+        )
+        
+        if ([string]::IsNullOrWhiteSpace($serviceAccount)) {
+            [System.Windows.MessageBox]::Show(
+                "Service Account name is required for EntraConnectAuditing or RemoteSAM configuration.",
+                "Missing Service Account",
+                [System.Windows.MessageBoxButton]::OK,
+                [System.Windows.MessageBoxImage]::Warning)
+            return
+        }
+    }
+    
+    $configString = $configs -join ","
+    $command = "Test-MDIConfiguration -Mode $mode -Configuration $configString"
+    
+    # Add Identity parameter if provided
+    if ($serviceAccount) {
+        $command += " -Identity '$serviceAccount'"
+    }
     
     $Controls.txtOutput.Text = "Executing: $command`n`n"
     $Controls.txtOutput.Text += Invoke-MDICommand $command
@@ -634,27 +771,19 @@ $Controls.btnTestDSA.Add_Click({
         return
     }
     
-    $command = "Test-MDIDSA -Identity '$gmsaIdentity'"
+    $command = "Test-MDIDSA -Identity '$gmsaIdentity' -Detailed"
     
-    $Controls.txtOutput.Text = "Testing gMSA account...`n`n"
+    $Controls.txtOutput.Text = "Testing gMSA account with detailed output...`n`n"
     $Controls.txtOutput.Text += "Executing: $command`n`n"
     $Controls.txtOutput.Text += "Testing Directory Service Account permissions and delegations...`n`n"
     
     try {
-        $result = Test-MDIDSA -Identity $gmsaIdentity
+        $result = Test-MDIDSA -Identity $gmsaIdentity -Detailed
         $Controls.txtOutput.Text += $result | Format-List * | Out-String
     }
     catch {
         $Controls.txtOutput.Text += "Error: $($_.Exception.Message)"
     }
-})
-
-# Get Configuration button
-$Controls.btnGetConfig.Add_Click({
-    $command = "Get-MDIConfiguration"
-    
-    $Controls.txtOutput.Text = "Executing: $command`n`n"
-    $Controls.txtOutput.Text += Invoke-MDICommand $command
 })
 
 # Clear Output button
