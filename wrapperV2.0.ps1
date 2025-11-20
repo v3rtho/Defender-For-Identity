@@ -33,10 +33,18 @@ Add-Type -AssemblyName Microsoft.VisualBasic
             <TabItem Header="Configuration">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="15">
-                        <TextBlock Text="Set MDI Configuration" 
-                                   FontSize="16" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Set MDI Configuration" 
+                                       FontSize="16" 
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"/>
+                            <Button x:Name="btnSetConfig" 
+                                    Content="Apply Configuration" 
+                                    Width="150" 
+                                    Height="30"
+                                    HorizontalAlignment="Right"/>
+                        </Grid>
 
                         <!-- Mode Selection -->
                         <GroupBox Header="Mode" Margin="0,0,0,15">
@@ -119,10 +127,18 @@ Add-Type -AssemblyName Microsoft.VisualBasic
             <TabItem Header="Test &amp; Validate">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="15">
-                        <TextBlock Text="Test MDI Configuration" 
-                                   FontSize="16" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,10"/>
+                        <Grid Margin="0,0,0,10">
+                            <TextBlock Text="Test MDI Configuration" 
+                                       FontSize="16" 
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"/>
+                            <Button x:Name="btnTestConfig" 
+                                    Content="Run Test" 
+                                    Width="120" 
+                                    Height="30"
+                                    HorizontalAlignment="Right"/>
+                        </Grid>
 
                         <!-- Test Mode -->
                         <GroupBox Header="Test Mode" Margin="0,0,0,15">
@@ -326,16 +342,6 @@ Add-Type -AssemblyName Microsoft.VisualBasic
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right"
                     Margin="0,10">
-            <Button x:Name="btnSetConfig" 
-                    Content="Apply Configuration" 
-                    Width="150" 
-                    Height="30"
-                    Margin="0,0,10,0"/>
-            <Button x:Name="btnTestConfig" 
-                    Content="Run Test" 
-                    Width="120" 
-                    Height="30"
-                    Margin="0,0,10,0"/>
             <Button x:Name="btnClearOutput" 
                     Content="Clear Output" 
                     Width="120" 
