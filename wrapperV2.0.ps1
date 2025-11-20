@@ -10,7 +10,8 @@ Add-Type -AssemblyName Microsoft.VisualBasic
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Defender for Identity Configurator" 
         Height="700" Width="900"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -20,11 +21,18 @@ Add-Type -AssemblyName Microsoft.VisualBasic
         </Grid.RowDefinitions>
 
         <!-- Title -->
-        <TextBlock Grid.Row="0" 
-                   Text="Microsoft Defender for Identity PowerShell Module" 
-                   FontSize="22" 
-                   FontWeight="Bold"
-                   Margin="0,0,0,15"/>
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="Microsoft Defender for Identity PowerShell Module" 
+                       FontSize="22" 
+                       FontWeight="Bold"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"/>
+            <TextBlock Text="© Thomas Verheyden" 
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Foreground="Gray"
+                       FontSize="11"/>
+        </Grid>
 
         <!-- Tab Control -->
         <TabControl Grid.Row="1">
