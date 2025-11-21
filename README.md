@@ -2,7 +2,6 @@
 
 A user-friendly graphical interface for managing Microsoft Defender for Identity (MDI) configurations using PowerShell.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
 
@@ -11,20 +10,24 @@ A user-friendly graphical interface for managing Microsoft Defender for Identity
 This PowerShell script provides a comprehensive WPF-based GUI wrapper around the Microsoft Defender for Identity PowerShell module. It simplifies the configuration, testing, and management of MDI deployments through an intuitive interface, eliminating the need to remember complex PowerShell commands.
 
 **Publisher:** Thomas Verheyden  
-**Release Date:** November 17, 2025
+**Release Date:** November 21, 2025
 
 ## ✨ Features
 
 ### 🔧 Configuration Management
 - Set MDI configurations for Domain or LocalMachine mode
-- Configure multiple audit policies:
-  - Advanced Audit Policy
-  - NTLM Auditing
-  - Domain Object Auditing
-  - Certificate Authority (CA) Auditing
-  - ADFS Auditing
-  - Configuration Container Auditing
-- Bulk configuration with "All Configurations" option
+ - All (all configurations)
+- AdfsAuditing
+- AdRecycleBin
+- AdvancedAuditPolicyCAs
+- AdvancedAuditPolicyDCs
+- CAAuditing
+- ConfigurationContainerAuditing
+- EntraConnectAuditing
+- RemoteSAM
+- DomainObjectAuditing
+- NTLMAuditing
+- ProcessorPerformance 
 
 ### 🧪 Testing & Validation
 - Test MDI configurations
@@ -68,14 +71,7 @@ Install-Module -Name DefenderForIdentity -Force
 
 ### 2. Download the Script
 
-Clone this repository or download the `MDI-GUI.ps1` file:
-
-```powershell
-git clone https://github.com/yourusername/mdi-powershell-gui.git
-cd mdi-powershell-gui
-```
-
-Or download directly from the [Releases](https://github.com/yourusername/mdi-powershell-gui/releases) page.
+Clone this repository or download the `MDI-configurator.ps1` 
 
 ### 3. Execution Policy
 
@@ -91,11 +87,8 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 #### Option 1: From PowerShell
 ```powershell
-.\MDI-GUI.ps1
+.\MDI-configurator.ps1
 ```
-
-#### Option 2: Right-click Method
-Right-click on `MDI-GUI.ps1` → **Run with PowerShell**
 
 ### First-Time Setup
 
@@ -107,13 +100,13 @@ Right-click on `MDI-GUI.ps1` → **Run with PowerShell**
 
 ### Configuration Tab
 1. Select your deployment mode (Domain or LocalMachine)
-2. Check the configuration items you want to apply
+2. Check the configuration items you want to apply & Choose if you want to use GPOprefix or GPOlinking
 3. Click **Apply Configuration**
 4. Monitor the output in the result pane
 
 ### Test & Validate Tab
 1. Choose the test mode (Domain or LocalMachine)
-2. Select which configuration to test
+2. Select which configuration to test & Choose if you want to use GPOprefix or GPOlinking
 3. Click **Run Test**
 4. Review test results in the output pane
 
@@ -134,8 +127,8 @@ Right-click on `MDI-GUI.ps1` → **Run with PowerShell**
 
 ### DSA Tab
 1. Enter DSA username and password
-2. Click **Create DSA** to create the account
-3. Use **Test DSA** to validate permissions
+2. Click **Create gMSA** to create the account
+3. Use **Test gMSA** to validate permissions
 4. Click **Get MDI Configuration** to view current settings
 
 ## 🔒 Security Considerations
@@ -145,68 +138,9 @@ Right-click on `MDI-GUI.ps1` → **Run with PowerShell**
 - **Logging:** All command outputs are displayed in the GUI for transparency
 - **Best Practice:** Run on a secure administrative workstation
 
-## 🛠️ Troubleshooting
-
-### Module Not Found
-```
-Error: DefenderForIdentity module is not installed
-```
-**Solution:** Install the module using `Install-Module -Name DefenderForIdentity -Force` as Administrator
-
-### Access Denied Errors
-```
-Error: Access is denied
-```
-**Solution:** Ensure you're running PowerShell as Administrator and have appropriate domain permissions
-
-### GUI Doesn't Launch
-```
-Exception calling XAML
-```
-**Solution:** Ensure you're running PowerShell 5.1 or later. Check with `$PSVersionTable.PSVersion`
-
-### Script Execution Blocked
-```
-cannot be loaded because running scripts is disabled
-```
-**Solution:** Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
-
-## 📝 Example Workflows
-
-### Setting Up MDI Configuration
-1. Open the **Configuration** tab
-2. Select **Domain** mode
-3. Check **All Configurations**
-4. Click **Apply Configuration**
-5. Wait for completion (may take several minutes)
-
-### Validating Deployment
-1. Open the **Test & Validate** tab
-2. Select **Domain** mode
-3. Choose **All Configurations**
-4. Click **Run Test**
-5. Review results for any failed checks
-
-### Generating Audit Report
-1. Open the **Reports** tab
-2. Set output path to `C:\MDIReports`
-3. Select **Domain** mode
-4. Check **Open HTML Report after generation**
-5. Click **Generate Report**
-
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Contributions are welcome!
 
 ## 🙏 Acknowledgments
 
@@ -214,8 +148,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - The PowerShell community for WPF examples and best practices
 
 ## 📧 Contact
-
-**Thomas Verheyden**
 
 For issues, questions, or suggestions, please open an issue on GitHub.
 
