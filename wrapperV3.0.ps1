@@ -1,5 +1,10 @@
-# Microsoft Defender for Identity - PowerShell GUI Wrapper
-# Requires: PowerShell 5.1 or later
+# Author: Thomas Verheyden
+# New relaase: 21.11.2025
+# Version: 1.0
+# Website: vertho.tech
+# Twitter: @thomasvrhydn
+# Disclaimer: Script provided as is. Use at own risk. No guarantees or warranty provided.
+
 
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName Microsoft.VisualBasic
@@ -963,3 +968,4 @@ Test-ModuleInstalled
 
 # Show the window
 $Window.ShowDialog() | Out-Null
+
